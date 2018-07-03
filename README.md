@@ -24,13 +24,13 @@ Metamask browser plugin      # for auto-signing of contracts (manual private-key
 
 solc (solidity compiler)     # needed for localhost compiling, instructions: https://solidity.readthedocs.io/en/v0.3.3/installing-solidity.html
 
-note: it's harder to install solc on centos/amazonAMI linux, of course, I had to install solidity from source, and update boost by hand:
+note: it's harder to install solc on centos/amazonAMI linux, of course, You to install solidity from source, and update boost by hand:
 
 wget http://repo.enetres.net/x86_64/boost-devel-1.59.0-1.x86_64.rpm
 
 yum --nogpgcheck localinstall boost-devel-1.59.0-1.x86_64.rpm
 
-I also had to make sure that /usr/local/lib was the last line in /etc/ld.so.conf
+You also need to make sure that /usr/local/lib was the last line in /etc/ld.so.conf
 
 and also run 'sudo ldconfig' afterwards for the system to notice...
 
@@ -55,34 +55,15 @@ sudo make install  # so that the apache user can access the solc compiler
 
 ### How to install
 
-git clone https://www.github.com/Tectract/EthDeployer
+git clone https://www.github.com/justdvnsh/solidity-onlinr-compiler-frontend
 
-cd EthDeployer
+cd solidity-onlinr-compiler-frontend
 
 npm i
 
 npm start     # for testing mode
 
 npm run build     # for live server hosting mode, use apache/httpd/nginx or similar routing tool for local path/URL customization
-
-my lines in /etc/httpd/conf/httpd.conf (should be the same for /etc/apache2/sites-enabled/default.conf)
-
-note: extra lines to catch case-sensitivity on linux path spellings :)
-
-Alias /EthDeployer /home/ec2-user/EthDeployer/build
-
-Alias /ethdeployer /home/ec2-user/EthDeployer/build  
-
-Alias /ethDeployer /home/ec2-user/EthDeployer/build
-
-Alias /Ethdeployer /home/ec2-user/EthDeployer/build
-
-<Directory /home/ec2-user/EthDeployer/build>
-
-  PassengerEnabled off
-
-</Directory>
-
 
 ### How to Use
 
@@ -107,7 +88,7 @@ links are displayed for the TXID and Contract address. You will need to WAIT abo
 use the web console debugger tool for console messages and debugging, please submit updates/upgrades, bug reports, feature requests THROUGH THE GITHUB ISSUES TOOL FOR THIS REPO!
 
 
-Useful tool info and examples for learning to write Ethereum smart-contracts, to accompany my BlockGeeks article
+Useful tool info and examples for learning to write Ethereum smart-contracts, to accompany my articles
 
 truffle commands:
 
