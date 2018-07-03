@@ -34,7 +34,9 @@ class Deploy extends Component {
       statusMessage: 'loading BrowserSolc compiler...',
       thisTxHash: '',
       thisAddress: '',
-      compiler: {}
+      compiler: {},
+      abi: '',
+      functions: null
     };
     this.RegisterChange = this.RegisterChange.bind(this);
   }
@@ -127,6 +129,7 @@ class Deploy extends Component {
       console.debug(thisMap);
 
       var abi = JSON.parse(thisMap[0][1].interface);
+      this.setState({ abi: JSON.stringify(abi) })
       var bytecode = "0x" + thisMap[0][1].bytecode;
 
       var myContract = web3.eth.contract(abi);
@@ -182,8 +185,8 @@ class Deploy extends Component {
                       thisAddress: "waiting to be mined..."
                     });
                   } else {
-                    console.log("Contract mined! Address: " + newContract.address);
-                    console.log(JSON.stringify(newContract));
+                    // console.log("Contract mined! Address: " + newContract.address);
+                    // console.log(JSON.stringify(newContract));
                     var thisNewStatus = "Contract Deployed to " + outerThis.state.thisNetId;
                     outerThis.setState({
                       statusMessage: thisNewStatus,
@@ -249,6 +252,100 @@ class Deploy extends Component {
     }
   }
 
+  interact() {
+    if ( this.state.abi ) {
+      let abi = JSON.parse(this.state.abi)
+      console.log('interact', abi)
+
+      let result = [];
+
+      for ( let fn of abi ) {
+        if ( fn.type === 'constructor' ) {
+          if ( fn.inputs.length == 0 ){
+            result.unshift((
+              <div><br/>
+              <a className="button is-success">constructor</a>
+              <div className="field">
+                <div className="control">
+                  <input className="input is-success" type="text" placeholder={fn.inputs[0].name} />
+                </div>
+              </div><br/>
+            </div>
+            ))
+          } else {
+            for ( let i of fn.inputs ) {
+              result.unshift((
+                <div><br/>
+                <a className="button is-success">constructor</a>
+                <div className="field">
+                  <div className="control">
+                    <input className="input is-success" type="text" placeholder={i.name} />
+                  </div>
+                </div><br/>
+              </div>
+              ))
+            }
+          }
+        } else if ( fn.type === 'function' && fn.constant === true ) {
+          result.push((
+            <div><br/>
+            <a className="button is-info">{fn.name}</a><br/>
+            </div>
+          ))
+        }
+         else if ( fn.type === 'function' && fn.constant === false ) {
+          if ( fn.inputs.length == 0 ) {
+            result.push((
+              <div>
+              <a className="button is-primary">{fn.name}</a>
+              <div className="field">
+                <div className="control">
+                  <input className="input is-primary" type="text" placeholder="" />
+                </div>
+              </div><br/>
+              </div>
+            ))
+          } else if ( fn.inputs.length == 1 ) {
+            result.push((
+              <div>
+              <a className="button is-primary">{fn.name}</a>
+              <div className="field">
+                <div className="control">
+                  <input className="input is-primary" type="text" placeholder={fn.inputs[0].name} />
+                </div>
+              </div><br/>
+              </div>
+            ))
+          }         
+          else {
+            for ( let i of fn.inputs ){
+              result.push((
+                <div>
+                <a className="button is-primary">{fn.name}</a>
+                <div className="field">
+                  <div className="control">
+                    <input className="input is-primary" type="text" placeholder={i.name} />
+                  </div>
+                </div><br/>
+                </div>
+              ))
+            }
+          }
+        } 
+      }
+      return result.map((res) => {
+        return res
+      });  
+    } else {
+      return(
+          'Nothing to show yet !'
+      )
+    }
+
+    // {/* inputType: fn.inputs[0].type */}
+    // this.setState({ functions: func })
+  }
+
   render() {
     return (
       <div className="container-fluid">
@@ -263,21 +360,21 @@ class Deploy extends Component {
           </div>
         </section>
         <div className="container"><br /><br />
-                      <div class="notification is-link">
-                        <button class="delete"></button>
+                      <div className="notification is-link">
+                        <button className="delete"></button>
                         Saw connection to network: <b>{ this.state.thisNetId }</b>!
                       </div>
-                      <div class="notification is-info">
-                        <button class="delete"></button>
+                      <div className="notification is-info">
+                        <button className="delete"></button>
                         Saw default Eth account to use: <b>{ this.defaultEthAddressLink() }</b>!
                       </div>
-                      <div class="notification is-success">
-                        <button class="delete"></button>
+                      <div className="notification is-success">
+                        <button className="delete"></button>
                           { this.state.statusMessage }
                       </div>
 
-          <div class="field">
-            <div class="control">
+          <div className="field">
+            <div className="control">
               <textarea className="textarea is-success" rows='18' cols='120' type="text" name='contractText'
                  ref='contractTextRef' placeholder="Success textarea" value={this.state.contractText}
                  onChange={this.RegisterChange}></textarea>
@@ -287,16 +384,16 @@ class Deploy extends Component {
           <button  className="button is-rounded" onClick={ () => { this.compileAndDeploy() } }>Compile & Deploy</button>
           <br /><br />
 
-          <div class="card">
-            <div class="card-content">
-              <p class="title">
+          <div className="card">
+            <div className="card-content">
+              <p className="title">
               new contract TXID: { this.txHashLink(this.state.thisTxHash) }
               </p>
             </div>
           </div><br /><br />
-          <div class="card">
-            <div class="card-content">
-              <p class="title">
+          <div className="card">
+            <div className="card-content">
+              <p className="title">
               new contract address: { this.ethAddressLink(this.state.thisAddress) }
               </p>
             </div>
@@ -304,9 +401,19 @@ class Deploy extends Component {
 
           <br />
           <br />
+
+          <div className="card">
+            <div className="card-content">
+                {/* { this.state.abi }
+                <button  className="button is-rounded" onClick={ () => { this.interact() } }>interact</button>
+                <br/><br/> */}
+                { this.interact() }
+            </div>
+          </div>
+
         </div>
-        <footer class="footer">
-          <div class="content has-text-centered">
+        <footer className="footer">
+          <div className="content has-text-centered">
             <p>
             <span style={{"fontSize":"13px","fontWeight":"bold"}}>
                     To use this tool you&#39;ll need a connection to an Ethereum network, via:<br />
